@@ -2,7 +2,10 @@ import 'dart:async';
 
 import 'package:flappy_bird/pages/homepage/barriers.dart';
 import 'package:flappy_bird/pages/homepage/bird.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -39,17 +42,76 @@ class _HomePageState extends State<HomePage> {
         barrierXtwo -= 0.05;
       });
       setState(() {
-        if (barrierXone < 1.1) {
-          barrierXone += 2.3;
+        if (barrierXone < -1.5) {
+          barrierXone += 3.3;
+        } else {
+          barrierXone -= 0.05;
+        }
+      });
+      setState(() {
+        if (barrierXtwo < -1.5) {
+          barrierXtwo += 3.3;
         } else {
           barrierXtwo -= 0.05;
         }
       });
-      if (flapValue > 1) {
+      if (birdIsDead()) {
         timer.cancel();
         gameHasStarted = false;
+        _showDialog();
       }
     });
+  }
+
+  bool birdIsDead() {
+    if (flapValue > 1) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  void resetGame() {
+    Navigator.pop(context);
+    setState(() {
+      flapValue = 0;
+      gameHasStarted = false;
+      time = 0;
+      initialHeight = flapValue;
+    });
+  }
+
+  void _showDialog() {
+    showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            backgroundColor: Colors.brown,
+            title: const Center(
+              child: Text(
+                "G A M E  O V E R",
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+            actions: [
+              GestureDetector(
+                onTap: resetGame,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(5),
+                  child: Container(
+                    padding: const EdgeInsets.all(7),
+                    color: Colors.white,
+                    child: const Text(
+                      "PLAY AGAIN",
+                      style: TextStyle(color: Colors.brown),
+                    ),
+                  ),
+                ),
+              )
+            ],
+          );
+        });
   }
 
   @override
@@ -59,49 +121,50 @@ class _HomePageState extends State<HomePage> {
         children: [
           Expanded(
               flex: 2,
-              child: Stack(
-                children: [
-                  GestureDetector(
-                    onTap: () {
-                      if (gameHasStarted) {
-                        jump();
-                      } else {
-                        startGame();
-                      }
-                    },
-                    child: AnimatedContainer(
+              child: GestureDetector(
+                onTap: () {
+                  if (gameHasStarted) {
+                    jump();
+                  } else {
+                    startGame();
+                  }
+                },
+                child: Stack(
+                  children: [
+                    AnimatedContainer(
                       alignment: Alignment(0, flapValue),
                       duration: const Duration(milliseconds: 0),
                       color: Colors.blue,
                       child: const MyBird(),
                     ),
-                  ),
-                  Container(
-                    alignment: const Alignment(0, -0.3),
-                    child: gameHasStarted
-                        ? const Text(" ")
-                        : const Text(
-                            "T A P  T O  P L A Y  !",
-                            style: TextStyle(fontSize: 20, color: Colors.white),
-                          ),
-                  ),
-                  AnimatedContainer(
-                      duration: const Duration(milliseconds: 0),
-                      alignment: Alignment(barrierXone, 1.1),
-                      child: const MyBarrier(size: 200.0)),
-                  AnimatedContainer(
-                      duration: const Duration(milliseconds: 0),
-                      alignment: Alignment(barrierXone, -1.1),
-                      child: const MyBarrier(size: 200.0)),
-                  AnimatedContainer(
-                      duration: const Duration(milliseconds: 0),
-                      alignment: Alignment(barrierXtwo, 1.1),
-                      child: const MyBarrier(size: 250.0)),
-                  AnimatedContainer(
-                      duration: const Duration(milliseconds: 0),
-                      alignment: Alignment(barrierXtwo, -1.1),
-                      child: const MyBarrier(size: 150.0)),
-                ],
+                    Container(
+                      alignment: const Alignment(0, -0.3),
+                      child: gameHasStarted
+                          ? const Text(" ")
+                          : const Text(
+                              "T A P  T O  P L A Y  !",
+                              style:
+                                  TextStyle(fontSize: 20, color: Colors.white),
+                            ),
+                    ),
+                    AnimatedContainer(
+                        duration: const Duration(milliseconds: 0),
+                        alignment: Alignment(barrierXone, 1.1),
+                        child: const MyBarrier(size: 200.0)),
+                    AnimatedContainer(
+                        duration: const Duration(milliseconds: 0),
+                        alignment: Alignment(barrierXone, -1.1),
+                        child: const MyBarrier(size: 200.0)),
+                    AnimatedContainer(
+                        duration: const Duration(milliseconds: 0),
+                        alignment: Alignment(barrierXtwo, 1.1),
+                        child: const MyBarrier(size: 250.0)),
+                    AnimatedContainer(
+                        duration: const Duration(milliseconds: 0),
+                        alignment: Alignment(barrierXtwo, -1.1),
+                        child: const MyBarrier(size: 150.0)),
+                  ],
+                ),
               )),
           Container(
             height: 15,
